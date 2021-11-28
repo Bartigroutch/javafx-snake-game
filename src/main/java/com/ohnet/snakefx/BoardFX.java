@@ -69,7 +69,7 @@ public class BoardFX extends Pane {
 
         locateApple();
     }
-
+/*
     @Override
     public void paintComponent(Graphics g) {
         super.paintComponent(g);
@@ -96,7 +96,7 @@ public class BoardFX extends Pane {
             gameOver(g);
         }
     }
-
+*/
     /**
      * postion randomly
      */
