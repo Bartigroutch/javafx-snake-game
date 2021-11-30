@@ -4,7 +4,6 @@ package com.ohnet.snakefx;
 import javafx.scene.image.Image;
 import javafx.scene.layout.Background;
 import javafx.scene.layout.Pane;
-import javafx.scene.paint.Color;
 
 public class BoardFX extends Pane {
 
