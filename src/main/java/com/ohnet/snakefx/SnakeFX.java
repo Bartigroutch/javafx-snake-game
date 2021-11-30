@@ -8,10 +8,7 @@ import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.Button;
 import javafx.scene.image.Image;
-import javafx.scene.layout.GridPane;
-import javafx.scene.layout.Pane;
-import javafx.scene.layout.TilePane;
-import javafx.scene.layout.VBox;
+import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import javafx.scene.text.Font;
@@ -54,18 +51,23 @@ public class SnakeFX extends Application {
     private Image head;
 
     public static void main(String[] args) {
-        launch();
+        launch(args);
     }
 
     @Override
     public void start(Stage primaryStage) throws IOException {
+        Pane root = new Pane();
 
-        Canvas canvas = new Canvas();
-        canvas.setHeight(B_WIDTH);
-        canvas.setWidth(B_HEIGHT);
+        StackPane holder = new StackPane();
+        Canvas canvas = new Canvas(B_WIDTH, B_HEIGHT);
+
+        holder.getChildren().add(canvas);
+        root.getChildren().add(holder);
+        holder.setStyle("-fx-background-color: black");
+
+        Scene scene = new Scene(root, B_WIDTH, B_HEIGHT);
 
         GraphicsContext graphicsContext2D = canvas.getGraphicsContext2D();
-
         loadImages();
         initGame();
 
@@ -78,10 +80,9 @@ public class SnakeFX extends Application {
                 graphicsContext2D.drawImage(ball, x[z], y[z]);
             }
         }
-        
-        VBox vbox = new VBox(canvas);
-        Scene scene = new Scene(vbox);
+
         primaryStage.setScene(scene);
+        primaryStage.setTitle("Sanke FX");
         primaryStage.show();
     }
 
