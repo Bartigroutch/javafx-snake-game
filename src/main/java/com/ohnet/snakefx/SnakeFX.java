@@ -1,24 +1,20 @@
 package com.ohnet.snakefx;
 
 import com.ohnet.snakefx.util.AnimationTimerExtension;
-import javafx.animation.AnimationTimer;
-import javafx.animation.KeyFrame;
-import javafx.animation.KeyValue;
-import javafx.animation.Timeline;
 import javafx.application.Application;
+import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
-import javafx.scene.control.Button;
 import javafx.scene.image.Image;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
-import javafx.util.Duration;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -49,7 +45,8 @@ public class SnakeFX extends Application {
     private int apple_y;
 
     private AnimationTimerExtension timer;
-    private static final int  TIME_TO_WAIT_MS = 1_000;
+    // time to wait to move the snake - as higher the value as slower the worm...
+    private static final int TIME_TO_WAIT_MS = 1_50;
 
     private Image ball;
     private Image apple;
@@ -69,7 +66,6 @@ public class SnakeFX extends Application {
 
         holder.getChildren().add(canvas);
         root.getChildren().add(holder);
-        //holder.setStyle("-fx-background-color: white");
 
         Scene scene = new Scene(root, B_WIDTH, B_HEIGHT);
 
@@ -87,49 +83,61 @@ public class SnakeFX extends Application {
             }
         }
 
-        Button button = new Button("I'm here...");
+        // needs to be set to have a key-listener
+        canvas.setFocusTraversable(true);
+        // reacts onKeyEvent and moves snake
+        canvas.setOnKeyPressed(new EventHandler<KeyEvent>() {
+            @Override
+            public void handle(KeyEvent keyEvent) {
+               switch (keyEvent.getCode()) {
+                        case UP:    leftDirection  = false;
+                                    rightDirection = false;
+                                    upDirection = true;
+                                    downDirection = false;
+                                    break;
+                        case DOWN:  leftDirection  = false;
+                                    rightDirection = false;
+                                    upDirection = false;
+                                    downDirection = true;
+                                    break;
+                        case LEFT:  leftDirection  = true;
+                                    rightDirection = false;
+                                    upDirection = false;
+                                    downDirection = false;
+                                    break;
+                        case RIGHT: leftDirection  = false;
+                                    rightDirection = true;
+                                    upDirection = false;
+                                    downDirection = false;
+                                    break;
+               }
+               move();
+            }
 
-        Timeline t = new Timeline(
-                new KeyFrame(Duration.seconds(0), new KeyValue(button.translateXProperty(), 0)),
-                new KeyFrame(Duration.seconds(2), new KeyValue(button.translateXProperty(), 80))
-        );
-        t.setAutoReverse(true);
-        t.setCycleCount(Timeline.INDEFINITE);
-        t.play();
+        });
 
         //You can add a specific action when each frame is started.
         timer = new AnimationTimerExtension(TIME_TO_WAIT_MS) {
             @Override
             public void handle() {
 
+                // clear the panel to see motion
+                graphicsContext2D.clearRect(0, 0, canvas.getWidth(), canvas.getHeight());
                 checkApple();
-
-                for (int z = 0; z < dots; z++) {
-
-                    checkCollision();
-                    if (z == 0) {
-                        move();
-                        doDrawing(primaryStage, graphicsContext2D);
-                        System.out.println("dot: " + z + " , x: " + x.length + " , y: "+ y.length);
-                    } else {
-                        move();
-                        doDrawing(primaryStage, graphicsContext2D);
-                        System.out.println("dot: " + z + " , x: " + x.length + " , y: "+ y.length);
-                    }
-                }
+                checkCollision();
+                move();
+                doDrawing(primaryStage, graphicsContext2D);
             }
 
         };
 
         timer.start();
 
-        holder.getChildren().add(button);
-
         primaryStage.setScene(scene);
         primaryStage.setTitle("Sanke FX");
         primaryStage.show();
     }
-    
+
     @Override
     public void stop() throws Exception {
         super.stop();
@@ -204,7 +212,7 @@ public class SnakeFX extends Application {
             }
             //Toolkit.getDefaultToolkit().sync();
         } else {
-            gameOverFX(stage);
+            new GameOverFX(stage).build();
         }
     }
 
@@ -239,22 +247,6 @@ public class SnakeFX extends Application {
         if (!inGame) {
             timer.stop();
         }
-    }
-
-    private void gameOverFX(Stage stage) {
-        TilePane tilePane = new TilePane();
-
-        Text text1 = new Text("Game Over");
-        text1.setFill(Color.BLACK);
-        text1.setFont(new Font("Verdana", 32));
-
-        tilePane.getChildren().add(text1);
-        tilePane.setAlignment(Pos.CENTER);
-
-        Scene scene = new Scene(tilePane, 320, 240);
-
-        stage.setScene(scene);
-        stage.show();
     }
 
     private void checkApple() {
